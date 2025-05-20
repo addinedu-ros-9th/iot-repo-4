@@ -3,10 +3,13 @@
 > **이 프로젝트는 RFID 태그를 따라 주행하는 소형 AGV가 설비와 실시간으로 통신하며 미션을 수행하는, IoT 기반 통합 운송 관제 시스템입니다.**  
 > **트럭(AGV)은 ESP32로 제어되며, 게이트/벨트/적재소 등 설비와 FSM 기반 서버를 통해 실시간 통합 제어됩니다. GUI 시스템은 운송 흐름을 시각적으로 모니터링하고 제어할 수 있도록 구현되었습니다..**
 
+## 🎥 영상 자료
 [시스템 소개 영상](https://youtu.be/AI76I9BiS1k?si=EfL9UZIdROXblnkd)
 
 [전체 구동 영상](https://youtu.be/LJ2RT1eQdgk)
 
+## 🛻 발표 자료
+[발표자료](https://docs.google.com/presentation/d/1FL6l2cNho4lIEEreOYMQ6edMlTMGJ92bY9mtO8bmuwk/edit?usp=sharing)
 ---
 
 ## 📚 목차
