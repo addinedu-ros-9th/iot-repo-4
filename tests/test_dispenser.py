@@ -48,9 +48,10 @@ class DummyFacilityStatusManager:
         return True
 
 class DispenserTester:
-    def __init__(self, port="/dev/ttyACM3", baudrate=9600, use_fake=False):
+    def __init__(self, port="/dev/ttyACM2", baudrate=9600, use_fake=False):
         """디스펜서 테스터 초기화"""
         self.port = port
+      
         self.baudrate = baudrate
         self.use_fake = use_fake
         self.interface = None
@@ -310,8 +311,8 @@ class DispenserTester:
 def parse_arguments():
     """명령줄 인자 파싱"""
     parser = argparse.ArgumentParser(description='디스펜서 테스트 스크립트')
-    parser.add_argument('--port', type=str, default='/dev/ttyACM3',
-                        help='시리얼 포트 (기본값: /dev/ttyACM3)')
+    parser.add_argument('--port', type=str, default='/dev/ttyACM2',
+                        help='시리얼 포트 (기본값: /dev/ttyACM2)')
     parser.add_argument('--baudrate', type=int, default=9600,
                         help='전송 속도 (기본값: 9600)')
     parser.add_argument('--fake', action='store_true',

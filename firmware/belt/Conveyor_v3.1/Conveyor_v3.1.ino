@@ -8,7 +8,7 @@ const int SENSOR_PIN_A = A0;
 const int SENSOR_PIN_B = A1;
 
 const int CDS_THRESHOLD_LOW = 70;
-const int CDS_THRESHOLD_HIGH = 120;
+const int CDS_THRESHOLD_HIGH = 180;
 const int MOTOR_SPEED =254;
 
 bool debugMode = false;
