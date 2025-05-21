@@ -63,9 +63,15 @@
     </tr>
     <tr>
       <td><strong>이건우</strong></td>
-      <td><span style="color: gray;">-</span></td>
       <td>
-        (작성 예정)
+        <a href="https://github.com/DigitalNomad230">
+          <img src="https://img.shields.io/badge/github-DigitalNomad230-181717?style=flat-square&logo=github&logoColor=white">
+        </a>
+      </td>
+      <td>
+        프로젝트 기술문서 검토 및 관리<br>
+        자원저장센터 기구 설계 및 제작<br>
+        컨테이너 적재량 연동 센터가동 로직 구현<br>
       </td>
     </tr>
     <tr>
