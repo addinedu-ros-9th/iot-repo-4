@@ -3,6 +3,8 @@
 > **이 프로젝트는 RFID 태그를 따라 주행하는 소형 AGV가 설비와 실시간으로 통신하며 미션을 수행하는, IoT 기반 통합 운송 관제 시스템입니다.**  
 > **트럭(AGV)은 ESP32로 제어되며, 게이트/벨트/적재소 등 설비와 FSM 기반 서버를 통해 실시간 통합 제어됩니다. GUI 시스템은 운송 흐름을 시각적으로 모니터링하고 제어할 수 있도록 구현되었습니다.**
 
+`⏰ 프로젝트 기간: 2025.05.03 ~ 2025.05.15`
+
 ## 🎥 영상 자료
 
 [시스템 소개 영상](https://youtu.be/AI76I9BiS1k?si=EfL9UZIdROXblnkd)
@@ -114,8 +116,6 @@
   <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/facilities/belt_2.gif?raw=true" width="45%" style="margin-right:10px;">
   <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/facilities/load_1.gif?raw=true" width="45%">
 </p>
-
-> ⏰ **프로젝트 기간**: 2025.05.03 ~ 2025.05.15
 
 `D.U.S.T. (Dynamic Unified Smart Transport)`는 RFID 기반 위치 인식을 바탕으로 경로를 따라 주행하는 소형 AGV를 중심으로, 게이트, 컨베이어 벨트, 적재소 등 물류 설비를 실시간으로 통합 제어하는 IoT 기반 운송 관제 시스템입니다.
 
