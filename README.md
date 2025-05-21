@@ -11,7 +11,7 @@
 
 ## 🛻 발표 자료
 
-[발표자료](https://docs.google.com/presentation/d/1FL6l2cNho4lIEEreOYMQ6edMlTMGJ92bY9mtO8bmuwk/edit?usp=sharing)
+[발표자료](https://docs.google.com/presentation/d/1-bRbadY4XmSBsaMfYFJiN6WQ00letQ_9P2LTwLdzEXg/edit?usp=sharing)
 
 ---
 
