@@ -292,7 +292,7 @@ RFID 인식 직전에 약 0.5초간 PID 제어를 일시 정지하고, 기존 PW
 ## 6-1 시스템 아키텍처
 
 <p align="center">
-  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/system_architecture/system.png?raw=true" width="85%">
+  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/system_architecture/sys_archi.png?raw=true" width="85%">
 </p>
 
 이 시스템은 AGV, 서버, 설비, GUI가 유기적으로 연결된 IoT 기반 통합 제어 구조로 설계되었습니다.
@@ -314,7 +314,7 @@ RFID 인식 직전에 약 0.5초간 PID 제어를 일시 정지하고, 기존 PW
 | **MissionManager** | 미션 등록/변경/기록 처리 |
 
 <p align="center">
-  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/system_architecture/sw.png?raw=true" width="85%">
+  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/system_architecture/sw_archi.png?raw=true" width="85%">
 </p>
 
 ### 🏗 하드웨어 구성
@@ -324,7 +324,7 @@ RFID 인식 직전에 약 0.5초간 PID 제어를 일시 정지하고, 기존 PW
 - 충전소: 배터리 상태 감지 및 응답용 구성
 
 <p align="center">
-  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/system_architecture/hw.png?raw=true" width="85%">
+  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/system_architecture/hw_archi.png?raw=true" width="85%">
 </p>
 
 ---
@@ -351,11 +351,15 @@ RFID 인식 직전에 약 0.5초간 PID 제어를 일시 정지하고, 기존 PW
   <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/scenario/obstacle.png?raw=true" width="85%">
 </p>
 
-### 5. **벨트 제어 및 경로 관리**
+### 5-1. **자원 저장 센터 벨트가동**
 <p align="center">
-  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/scenario/belt.png?raw=true" width="85%">
+  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/scenario/resource_center_seq2.png?raw=true" width="85%">
 </p>
 
+### 5-2. **자원 저장 센터 컨테이너 변경**
+<p align="center">
+  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/scenario/resource_center_seq1.png?raw=true" width="85%">
+</p>
 ---
 
 ## 6-3. FSM기반 상태제어 흐름
