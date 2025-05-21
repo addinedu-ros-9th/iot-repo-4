@@ -7,7 +7,7 @@
 
 ## 🎥 영상 자료
 
-[전체 구동 시연 및 시스템 소개 영상](https://www.youtube.com/watch?v=iiION6qMbMk)
+[시스템 구동 영상](https://youtu.be/hftyShwyZxk)
 
 ## 🛻 발표 자료
 
