@@ -268,7 +268,7 @@ RFID 인식 직전에 약 0.5초간 PID 제어를 일시 정지하고, 기존 PW
 ---
 
 ### 🔗 UR ↔ SR 매핑 관계
-70
+
 | 사용자 요구사항 (UR) | 관련 시스템 기능 (SR) |
 |----------------------|------------------------|
 | UR_01 AGV는 특정 장소로 이동할 수 있어야 한다. | SR_06, SR_08 |
@@ -360,6 +360,7 @@ RFID 인식 직전에 약 0.5초간 PID 제어를 일시 정지하고, 기존 PW
 <p align="center">
   <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/scenario/resource_center_seq1.png?raw=true" width="85%">
 </p>
+
 ---
 
 ## 6-3. FSM기반 상태제어 흐름
