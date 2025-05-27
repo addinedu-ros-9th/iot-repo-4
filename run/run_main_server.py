@@ -25,18 +25,14 @@ port_map = {
     # 실제 장치 연결 설정
     "GATE_A": "/dev/ttyACM0",  # 게이트 A, B가 같은 아두이노에 연결됨
     "GATE_B": "/dev/ttyACM0",  # 게이트 A, B에 동일한 포트 지정
-<<<<<<< HEAD
-    "BELT": "/dev/ttyACM2"     # 벨트는 실제 장치로 연결
-=======
     "BELT": "/dev/ttyACM1",    # 벨트는 실제 장치로 연결
-    "DISPENSER": "/dev/ttyACM3", # 디스펜서 추가
->>>>>>> aaebe7d954a877c663941d0fea360451049f8d5b
+    "DISPENSER": "/dev/ttyACM2", # 디스펜서 추가
 }
 
 print("[초기화] 포트 맵:", port_map)
 
 # 하드웨어 사용 여부 설정
-USE_FAKE_HARDWARE = True  # 가상 하드웨어 모드로 설정
+USE_FAKE_HARDWARE = False  # 가상 하드웨어 모드로 설정
 
 # 특정 장치만 가상 모드로 설정
 FAKE_DEVICES = []  # 모든 장치를 가상으로 사용

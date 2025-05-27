@@ -51,6 +51,7 @@ class DispenserTester:
     def __init__(self, port="/dev/ttyACM2", baudrate=9600, use_fake=False):
         """디스펜서 테스터 초기화"""
         self.port = port
+      
         self.baudrate = baudrate
         self.use_fake = use_fake
         self.interface = None
