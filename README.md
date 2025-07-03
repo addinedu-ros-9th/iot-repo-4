@@ -106,25 +106,25 @@
 
 ### Main Monitoring 탭
 <p align="center">
-  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/main_monitoring_1.gif?raw=true" width="45%">
+  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/main_monitoring_1.gif?raw=true" width="65%">
 </p>
 <p align="center">
-  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/main_monitoring_2.gif?raw=true" width="45%">
+  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/main_monitoring_2.gif?raw=true" width="65%">
 </p>
 
 ### Mission Management 탭
 <p align="center">
-  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/mission%20management.gif?raw=true" width="45%">
+  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/mission%20management.gif?raw=true" width="65%">
 </p>
 
 ### Event Log 탭
 <p align="center">
-  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/event%20log.gif?raw=true" width="45%">
+  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/event%20log.gif?raw=true" width="65%">
 </p>
 
 ### Settings 탭
 <p align="center">
-  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/settings.gif?raw=true" width="45%">
+  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/settings.gif?raw=true" width="65%">
 </p>
 
 - `메인 모니터링 탭` : AGV 위치 및 FSM 상태 실시간 시각화 + 수동 제어 가능
