@@ -36,6 +36,10 @@
 
 # 2. 프로젝트 목적
 
+<p align="center">
+  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/agv.jpg?raw=true" width="50%">
+</p>
+
 산업 현장에서는 `AGV(Automated Guided Vehicle)`가 **정해진 경로를 따라 자율 주행하며**, 다양한 설비(게이트, 벨트, 저장소)와 **연동되는 시스템**이 점점 요구되고 있습니다.
 
 따라서 본 프로젝트는 `AGV`를 기반으로, **물류 자동화 시나리오의 흐름을 단일 제어 구조로 통합**하는 데 목적이 있습니다.
