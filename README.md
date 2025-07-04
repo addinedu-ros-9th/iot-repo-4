@@ -116,26 +116,28 @@
   <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/main_monitoring_2.gif?raw=true" width="65%">
 </p>
 
+- `메인 모니터링 탭` : AGV 위치 및 FSM 상태 실시간 시각화 + 수동 제어 가능
+
 ### Mission Management 탭
 <p align="center">
   <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/mission%20management.gif?raw=true" width="65%">
 </p>
+
+- `미션 관리 탭` : 미션 수동 등록/삭제 + 전체 흐름 관리 (생성 → 배정 → 완료)
 
 ### Event Log 탭
 <p align="center">
   <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/event%20log.gif?raw=true" width="65%">
 </p>
 
+- `이벤트 로그 탭` : 상태 변화, 명령 수행, 센서 감지 등 이벤트 실시간 추적
+
 ### Settings 탭
 <p align="center">
   <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/settings.gif?raw=true" width="65%">
 </p>
 
-- `메인 모니터링 탭` : AGV 위치 및 FSM 상태 실시간 시각화 + 수동 제어 가능
-- `미션 관리 탭` : 미션 수동 등록/삭제 + 전체 흐름 관리 (생성 → 배정 → 완료)
-- `이벤트 로그 탭` : 상태 변화, 명령 수행, 센서 감지 등 이벤트 실시간 추적
 - `Setting 탭` : AGV ID, 포트, 통신 등 시스템 운용 설정
-- `로그인 기능` : 권한 기반 기능 접근 제어 (관리자 / 오퍼레이터)
 
 ---
 
