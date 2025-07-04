@@ -64,35 +64,47 @@
 
 # 4. 주요 기능
  
-## 🚚 AGV 관련 기능
+<h2>🚚 AGV 관련 기능</h2>
 
-<p align="center">
-  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/truck/truck_1.gif?raw=true" width="45%" style="margin-right:10px;">
-  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/truck/truck_2.gif?raw=true" width="45%">
-</p>
-
-- `자동 주행` : `ESP32` 제어를 통한 `RFID` 경로 기반 주행 
-- `위치 인식 및 보고` : RFID 태그 → 위치 판단 및 서버 송신
-- `배터리 모니터링` : 잔량 및 FSM 상태 → 주기적 서버 보고
-- `미션 수행` : 서버 미션 수신 → FSM 전이 + 자동 하역
-- `충돌 방지` : 초음파 센서 기반 정지 처리
+<table>
+  <tr>
+    <td colspan="2" align="center">
+      <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/truck/truck_1.gif?raw=true" width="45%" style="margin-right:10px;">
+      <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/truck/truck_2.gif?raw=true" width="45%">
+    </td>
+  </tr>
+  <tr>
+    <td>🔁 <b>자동 주행</b></td>
+    <td>ESP32 제어를 통한 RFID 경로 기반 주행</td>
+  </tr>
+  <tr>
+    <td>📡 <b>위치 인식 및 보고</b></td>
+    <td>RFID 태그 인식 → 위치 판단 및 서버 송신</td>
+  </tr>
+  <tr>
+    <td>🔋 <b>배터리 모니터링</b></td>
+    <td>잔량 및 FSM 상태를 주기적으로 서버에 보고</td>
+  </tr>
+  <tr>
+    <td>📦 <b>미션 수행</b></td>
+    <td>서버 미션 수신 → FSM 전이 및 자동 하역</td>
+  </tr>
+  <tr>
+    <td>🛑 <b>충돌 방지</b></td>
+    <td>초음파 센서 기반 정지 제어</td>
+  </tr>
+</table>
 
 ---
 
-## 🏗 시설 제어 기능
+## 🏭 설비 제어 기능 요약
 
-<p align="center">
-  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/facilities/gate_1.gif?raw=true" width="30%" style="margin-right:10px;">
-  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/facilities/load_1.gif?raw=true" width="30%" style="margin-right:10px;">
-  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/facilities/belt_1.gif?raw=true" width="30%">
-</p>
+| 설비 구분       | 예시 이미지 | 주요 기능 설명 |
+|----------------|-------------|----------------|
+| **🚪 게이트 제어** | <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/facilities/gate_1.gif?raw=true" width="220px"> | - 등록 AGV 접근 시 **자동 개방**<br>- 미등록 AGV 접근 시 **차단** |
+| **📦 분배기 제어** | <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/facilities/load_1.gif?raw=true" width="220px"> | - **화물 자동 적하**: AGV 도착 시 자동 투하<br> |
+| **🌀 벨트/저장소 제어** | <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/facilities/belt_1.gif?raw=true" width="220px"> | - **벨트 작동**: 서버 명령 또는 조건 충족 시 작동/정지<br>- **저장소 상태 감지**: 센서 기반 포화 상태 감지<br>- **자동 선택**: 컨테이너 A/B 중 여유 공간 선택<br>- **안전 제어**: 포화 시 벨트 작동 차단 |
 
-- `게이트 제어` : 등록 AGV → 자동 개방 / 미등록 AGV → 차단
-- `벨트 작동 제어` : 서버 명령 또는 조건 → 자동 작동/정지
-- `화물 적하 기능` : AGV 도착 시 자동 투하 / GUI 수동 전환 가능
-- `저장소 상태 감지` : 센서로 포화 여부 감지 → 서버 보고
-- `저장소 자동 선택` : 컨테이너 A/B 중 여유 공간 선택
-- `벨트 안전 제어 로직` : 포화 상태일 경우 벨트 작동 거부 → 안전 유지
 
 ---
 
@@ -108,36 +120,14 @@
 
 ## 🧑‍💼 사용자 인터페이스
 
-### Main Monitoring 탭
-<p align="center">
-  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/main_monitoring_1.gif?raw=true" width="65%">
-</p>
-<p align="center">
-  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/main_monitoring_2.gif?raw=true" width="65%">
-</p>
+| 탭 이름               | 주요 기능 설명                                                                 | 예시 이미지 |
+|------------------------|------------------------------------------------------------------------------|-------------|
+| **📍 Main Monitoring** | - AGV 위치 및 FSM 상태 실시간 시각화<br>- 수동 제어 기능 제공                | ![main1](https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/main_monitoring_1.gif?raw=true) |
+| **🧭 Mission Management** | - 미션 수동 등록 및 삭제<br>- 미션 생성 → 배정 → 완료 흐름 관리             | ![mission](https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/mission%20management.gif?raw=true) |
+| **📑 Event Log**       | - 상태 변화, 명령 수행, 센서 감지 등<br>- 이벤트 실시간 추적                 | ![event](https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/event%20log.gif?raw=true) |
+| **⚙️ Settings**        | - AGV ID, 포트, 통신 등 시스템 운용 설정                                    | ![settings](https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/settings.gif?raw=true) |
 
-- `메인 모니터링 탭` : AGV 위치 및 FSM 상태 실시간 시각화 + 수동 제어 가능
 
-### Mission Management 탭
-<p align="center">
-  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/mission%20management.gif?raw=true" width="65%">
-</p>
-
-- `미션 관리 탭` : 미션 수동 등록/삭제 + 전체 흐름 관리 (생성 → 배정 → 완료)
-
-### Event Log 탭
-<p align="center">
-  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/event%20log.gif?raw=true" width="65%">
-</p>
-
-- `이벤트 로그 탭` : 상태 변화, 명령 수행, 센서 감지 등 이벤트 실시간 추적
-
-### Settings 탭
-<p align="center">
-  <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/gui/settings.gif?raw=true" width="65%">
-</p>
-
-- `Setting 탭` : AGV ID, 포트, 통신 등 시스템 운용 설정
 
 ---
 
@@ -145,17 +135,23 @@
 
 본 프로젝트에서는 실제 구현 과정에서 다양한 기술적 문제가 발생했으며, 
 이를 직접 해결해나가는 과정을 통해 시스템의 안정성과 응답 속도를 향상시켰습니다.
-- `통신 지연` : JSON 파싱 지연 → 주요 명령은 바이트 프로토콜로 전환하여 응답 속도 향상
-- `PWM 불안정` : RFID 리딩 시 제어 루프 충돌 → 리딩 중 PID 일시 정지로 주행 안정성 확보
+
+| 문제 유형     | 발생 원인                          | 해결 방법 |
+|---------------|------------------------------------|-----------|
+| 통신 지연     | JSON 파싱 지연                     | 주요 명령은 바이트 프로토콜로 전환하여 응답 속도 향상 |
+| PWM 불안정    | RFID 리딩 중 제어 루프(PID) 충돌  | 리딩 중 PID 일시 정지로 주행 안정성 확보 |
 
 ---
 
 # 6. 구현 제약 및 확장 가능성
 
-- `단일 AGV FSM 구조` : 현재 FSM/GUI는 1대 AGV만 지원 → 다중 FSM 확장 가능
-- `배터리 가상값 사용` : 잔량은 시뮬레이션 값 기반 → `INA226` 센서 연동 시 실시간 측정 및 최적화 가능
-- `설비 단순 응답 처리` : ACK 여부만 확인, 재시도 없음 → 타임아웃 기반 재전송 + 오류 로그로 신뢰성 개선
-- `설정 저장 미지원` : 설정값 세션 내 유지 → JSON/MySQL 기반 설정 저장 시 재시작 후 복원 가능
+| 제약 사항             | 현재 구현 방식                                | 확장 가능성 또는 개선 방향 |
+|------------------------|-----------------------------------------------|-----------------------------|
+| 단일 AGV FSM 구조       | FSM 및 GUI가 1대 AGV만 지원                   | 다중 AGV FSM 구조로 확장 가능 |
+| 배터리 가상값 사용      | 시뮬레이션 값 기반 잔량 처리                  | INA226 센서 연동 → 실시간 측정 및 최적화 |
+| 설비 단순 응답 처리     | 단순 ACK 수신 확인, 재시도 로직 없음          | 타임아웃 기반 재전송 + 오류 로그 기록 |
+| 설정 저장 미지원       | 설정값이 세션 내에서만 유지됨                 | JSON 또는 MySQL 기반 설정 저장 → 재시작 후 복원 가능 |
+
 
 ---
 
