@@ -30,7 +30,7 @@
   <img src="https://github.com/addinedu-ros-9th/iot-repo-4/blob/main/assets/images/facilities/load_1.gif?raw=true" width="45%">
 </p>
 
-`D.U.S.T. (Dynamic Unified Smart Transport)`는 `RFID 기반 위치 인식`을 바탕으로 경로를 따라 주행하는 `AGV`와 게이트, 컨베이어 벨트, 적재소 등 `물류 설비`를 실시간으로 `통합 제어`하는 IoT 기반 운송 관제 시스템입니다.
+`DUST (Dynamic Unified Smart Transport)`는 `RFID 기반 위치 인식`을 바탕으로 경로를 따라 주행하는 `AGV`와 게이트, 컨베이어 벨트, 적재소 등 `물류 설비`를 실시간으로 `통합 제어`하는 IoT 기반 운송 관제 시스템입니다.
 
 ---
 
@@ -172,8 +172,8 @@
 # 8. 팀 구성
 
 ### 🧑‍💼 김대인 [`@Daeinism`](https://github.com/Daeinism)
-- 프로젝트 총괄  
-- 자원 분배기 기구 및 펌웨어 제작  
+- DUST 프로젝트 총괄  
+- 자원 분배기 기구 및 펌웨어 제작
 - 차단기 기구 및 펌웨어 제작
 
 ### 🧑‍💼 이건우 [`@DigitalNomad230`](https://github.com/DigitalNomad230)
