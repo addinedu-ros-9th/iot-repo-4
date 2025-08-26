@@ -1,10 +1,19 @@
 from flask import Blueprint, jsonify, request
-from backend.rest_api.managers import get_truck_status_manager
+from backend.rest_api.managers import get_truck_status_manager, get_truck_fsm_manager
 
 # 트럭 관련 API 블루프린트 생성
 truck_api = Blueprint('truck_api', __name__)
 
-# ------------------ 트럭 상태 API ----------------------------
+# ------------------ 신규 FSM 기반 상태 API -------------------
+
+@truck_api.route("/trucks/status", methods=["GET"])
+def get_all_truck_fsm_statuses():
+    """모든 트럭의 FSM 기반 현재 상태를 반환합니다."""
+    manager = get_truck_fsm_manager()
+    statuses = manager.get_all_truck_statuses()
+    return jsonify(statuses)
+
+# ------------------ 기존 트럭 상태 API ---------------------
 
 # 전체 트럭 상태 조회
 @truck_api.route("/trucks", methods=["GET"])

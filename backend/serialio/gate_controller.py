@@ -1,312 +1,87 @@
-# backend/serialio/gate_controller.py
-
-import time
 from .serial_controller import SerialController
 
 class GateController(SerialController):
+    """
+    게이트의 상태를 관리하고, 시리얼 통신을 통해 게이트를 제어합니다.
+    SerialController를 상속받아 안정적인 통신 기능을 사용합니다.
+    """
     def __init__(self, serial_interface, facility_status_manager=None):
         super().__init__(serial_interface)
-        self.gate_states = {
-            "GATE_A": "CLOSED",
-            "GATE_B": "CLOSED"
-        }
-        self.operations_in_progress = {}
-        self.current_gate_id = None  # 현재 작업 중인 게이트 ID
+        self.gate_states = {"GATE_A": "UNKNOWN", "GATE_B": "UNKNOWN"}
         self.facility_status_manager = facility_status_manager
-        
-    # ----------------------- 명령 전송 -----------------------
-    
-    def send_command(self, gate_id: str, action: str):
-        self.current_gate_id = gate_id  # 현재 게이트 ID 저장
-        if action.upper() == "OPEN":
-            return self.open_gate(gate_id)
-        elif action.upper() == "CLOSE":
-            return self.close_gate(gate_id)
-        else:
-            print(f"[GateController] 알 수 없는 동작: {action}")
-            return False
-    
-    # ----------------------- 상태 관리 -----------------------
-    
-    def _update_gate_status(self, gate_id: str, state: str, operation: str = "IDLE"):
-        """게이트 상태 업데이트 및 facility_status_manager에 보고"""
-        # 내부 상태 업데이트
-        old_state = self.gate_states.get(gate_id)
-        self.gate_states[gate_id] = state
-        print(f"[게이트 상태 업데이트] {gate_id}: {old_state} → {state}")
-        
-        # facility_status_manager가 있으면 상태 업데이트
-        if self.facility_status_manager:
-            self.facility_status_manager.update_gate_status(gate_id, state, operation)
-    
-    # ----------------------- 메시지 처리 -----------------------
-    
-    # 메시지 처리
-    def handle_message(self, message: str):
-        if not message:
-            return
-            
-        # 게이트 상태 변경을 나타내는 메시지 분석
-        parsed = self.interface.parse_response(message)
-        
-        # 게이트 상태 메시지 처리
-        if parsed["type"] == "GATE" and "gate_id" in parsed and "state" in parsed:
-            gate_id = parsed["gate_id"]
-            state = parsed["state"]
-            
-            # 상태 업데이트
-            if gate_id in self.gate_states:
-                # facility_status_manager 업데이트 메서드 호출
-                self._update_gate_status(gate_id, state, "STATUS_UPDATE")
-        
-        # 다른 관련 메시지 처리 (필요시 확장)
-        elif parsed["type"] != "UNKNOWN" and parsed["type"] != "EMPTY":
-            print(f"[GateController] 기타 메시지 수신: {message}")
 
-    # 응답이 성공을 나타내는지 확인
-    def _is_success_response(self, response, gate_id, action):
-        if not response:
-            return False
-            
-        parsed = self.interface.parse_response(response)
-        
-        # ACK 메시지 처리 (표준 형식)
-        if parsed["type"] == "ACK":
-            if "command" in parsed:
-                # 명령과 게이트 ID가 일치하는지 확인
-                expected_command = f"{gate_id}_{action}"
-                if expected_command.upper() in parsed["command"].upper():
-                    # SUCCESS 또는 OK가 결과에 포함되어 있거나, 결과가 비어있으면 성공으로 처리
-                    # OPENED나 CLOSED 키워드가 있어도 성공으로 처리
-                    if (not parsed.get("result") or 
-                        parsed["result"] == "SUCCESS" or 
-                        parsed["result"] == "OK" or 
-                        "SUCCESS" in parsed["result"] or
-                        "OPENED" in parsed["command"] or
-                        "CLOSED" in parsed["command"]):
-                        print(f"[게이트 응답 성공] {response} -> {expected_command} 명령 성공")
-                        return True
-                        
-                # 단순히 명령이 포함된 ACK 응답도 성공으로 처리
-                if f"{gate_id}_OPENED" in parsed["command"] and action.upper() == "OPEN":
-                    print(f"[게이트 OPEN 응답 성공] {response}")
-                    return True
-                    
-                if f"{gate_id}_CLOSED" in parsed["command"] and action.upper() == "CLOSE":
-                    print(f"[게이트 CLOSE 응답 성공] {response}")
-                    return True
-        
-        # STATUS 메시지 처리 (표준 형식)
-        elif parsed["type"] == "STATUS" or parsed["type"] == "GATE":
-            if "gate_id" in parsed and parsed["gate_id"] == gate_id:
-                if (action.upper() == "OPEN" and parsed["state"] == "OPENED") or \
-                   (action.upper() == "CLOSE" and parsed["state"] == "CLOSED"):
-                    return True
-            elif "target" in parsed and parsed["target"] == gate_id:
-                if (action.upper() == "OPEN" and parsed["state"] == "OPENED") or \
-                   (action.upper() == "CLOSE" and parsed["state"] == "CLOSED"):
-                    return True
-        
-        # 텍스트 기반 검사 (하위 호환성)
-        if (response.startswith(f"ACK:{gate_id}_OPEN") or 
-            response.startswith(f"ACK:{gate_id}_CLOSE") or
-            response.startswith(f"STATUS:{gate_id}:OPENED") or
-            response.startswith(f"STATUS:{gate_id}:CLOSED")) and (
-            "SUCCESS" in response or "OK" in response or 
-            "OPENED" in response or "CLOSED" in response or
-            "_OPENED" in response or "_CLOSED" in response):
-            print(f"[게이트 텍스트 응답 성공] {response}")
-            return True
-                
-        print(f"[게이트 응답 실패] {response} - 기대 명령: {gate_id}_{action}")
-        return False
-
-    # ----------------------- 게이트 제어 -----------------------
-
-    # 게이트 열기
-    def open_gate(self, gate_id: str):
-        if not gate_id:
-            print(f"[게이트 ID 누락] 게이트 ID가 지정되지 않았습니다.")
-            return False
-            
-        # 이미 열려있거나 작업이 진행 중인 경우 무시
+    def open_gate(self, gate_id: str) -> bool:
+        """게이트를 여는 명령을 보내고 성공 여부를 반환합니다."""
         if self.gate_states.get(gate_id) == "OPENED":
-            print(f"[게이트 이미 열림] {gate_id}는 이미 열려 있습니다.")
+            print(f"[{gate_id}] 이미 열려있습니다.")
             return True
-        
-        if gate_id in self.operations_in_progress and self.operations_in_progress[gate_id]:
-            print(f"[게이트 작업 중] {gate_id}에 대한 작업이 이미 진행 중입니다.")
-            return False
-        
-        # 작업 시작 표시
-        self.operations_in_progress[gate_id] = True
-        print(f"[게이트 열기 요청] → {gate_id}")
-        
-        # facility_status_manager 상태 업데이트 - 작업 시작
-        if self.facility_status_manager:
-            self.facility_status_manager.update_gate_status(gate_id, "CLOSED", "OPENING")
-        
-        # 게이트 ID를 저장(응답 확인용)
-        self.current_gate_id = gate_id
-        
-        # 명령 전송 - 표준화된 프로토콜 사용
-        self.interface.send_command(gate_id, "OPEN")
-        
-        # 응답 대기
-        print(f"[게이트 열림 대기 중] {gate_id} - 최대 15초 대기")
-        response = self.interface.read_response(timeout=15)
-        
-        # 응답 확인
-        success = self._is_success_response(response, gate_id, "OPEN")
-        
-        # 결과 처리
+
+        print(f"[{gate_id}] 게이트 열기 요청...")
+        self._update_gate_status(gate_id, self.gate_states.get(gate_id, "UNKNOWN"), "OPENING")
+
+        # 부모 클래스의 안정적인 통신 메서드를 사용하여 명령 전송 및 ACK 대기
+        success = self.send_command_and_wait_ack(gate_id, "OPEN", retries=3, timeout=5.0)
+
         if success:
-            print(f"[게이트 열림 완료] {gate_id} - 응답: {response}")
-            # facility_status_manager 업데이트 메서드 호출
+            print(f"[{gate_id}] 게이트 열기 성공.")
             self._update_gate_status(gate_id, "OPENED", "IDLE")
         else:
-            print(f"[게이트 열림 실패] {gate_id} - 응답: {response}")
-            # 시뮬레이션 환경에서는 ACK 포맷이 다를 수 있으므로, 열림 확인 시도
-            if response and ("OPENED" in response or "_OPENED" in response):
-                print(f"[게이트 열림 대체 확인] {gate_id} - 응답에 'OPENED' 문자열 확인됨")
-                self._update_gate_status(gate_id, "OPENED", "IDLE")
-                success = True
-            else:
-                # 실패 시 강제 열기 (모든 게이트에 대해 처리)
-                print(f"[강제 상태 변경] {gate_id} - 응답 실패로 강제로 OPENED 상태로 설정")
-                self._update_gate_status(gate_id, "OPENED", "FORCED_OPEN")
-                success = True
-                
-                # facility_status_manager 실패 상태 업데이트
-                if self.facility_status_manager:
-                    self.facility_status_manager.update_gate_status(gate_id, "CLOSED", "OPEN_FAILED")
+            print(f"[{gate_id}] 게이트 열기 실패.")
+            # 통신 실패 시, 이전 상태로 되돌리고 실패 상태를 보고
+            self._update_gate_status(gate_id, self.gate_states.get(gate_id, "UNKNOWN"), "OPEN_FAILED")
         
-        # 작업 완료 표시
-        self.operations_in_progress[gate_id] = False
         return success
 
-    # 게이트 닫기
-    def close_gate(self, gate_id: str):
-        if not gate_id:
-            print(f"[게이트 ID 누락] 게이트 ID가 지정되지 않았습니다.")
-            return False
-            
-        # 이미 닫혀있거나 작업이 진행 중인 경우 무시
+    def close_gate(self, gate_id: str) -> bool:
+        """게이트를 닫는 명령을 보내고 성공 여부를 반환합니다."""
         if self.gate_states.get(gate_id) == "CLOSED":
-            print(f"[게이트 이미 닫힘] {gate_id}는 이미 닫혀 있습니다.")
+            print(f"[{gate_id}] 이미 닫혀있습니다.")
             return True
-        
-        if gate_id in self.operations_in_progress and self.operations_in_progress[gate_id]:
-            print(f"[게이트 작업 중] {gate_id}에 대한 작업이 이미 진행 중입니다.")
-            return False
-        
-        # 작업 시작 표시
-        self.operations_in_progress[gate_id] = True
-        print(f"[게이트 닫기 요청] → {gate_id}")
-        
-        # facility_status_manager 상태 업데이트 - 작업 시작
-        if self.facility_status_manager:
-            self.facility_status_manager.update_gate_status(gate_id, "OPENED", "CLOSING")
-        
-        # 게이트 ID를 저장(응답 확인용)
-        self.current_gate_id = gate_id
-        
-        # 응답 대기 시간 연장
-        timeout = 15  # 15초로 확장
-        
-        # 명령 전송 - 표준화된 프로토콜 사용
-        self.interface.send_command(gate_id, "CLOSE")
-        
-        # 응답 대기
-        print(f"[게이트 닫힘 대기 중] {gate_id} - 최대 {timeout}초 대기")
-        response = self.interface.read_response(timeout=timeout)
-        
-        # 응답 확인
-        success = self._is_success_response(response, gate_id, "CLOSE")
-        
-        # 결과 처리
+
+        print(f"[{gate_id}] 게이트 닫기 요청...")
+        self._update_gate_status(gate_id, self.gate_states.get(gate_id, "UNKNOWN"), "CLOSING")
+
+        # 부모 클래스의 안정적인 통신 메서드를 사용하여 명령 전송 및 ACK 대기
+        success = self.send_command_and_wait_ack(gate_id, "CLOSE", retries=3, timeout=5.0)
+
         if success:
-            print(f"[게이트 닫힘 완료] {gate_id} - 응답: {response}")
-            # facility_status_manager 업데이트 메서드 호출
+            print(f"[{gate_id}] 게이트 닫기 성공.")
             self._update_gate_status(gate_id, "CLOSED", "IDLE")
         else:
-            # 시뮬레이션 환경에서는 ACK 포맷이 다를 수 있으므로, 닫힘 확인 시도
-            if response and ("CLOSED" in response or "_CLOSED" in response):
-                print(f"[게이트 닫힘 대체 확인] {gate_id} - 응답에 'CLOSED' 문자열 확인됨")
-                self._update_gate_status(gate_id, "CLOSED", "IDLE")
-                success = True
-            else:
-                # 재시도 로직
-                if not response:
-                    print(f"[게이트 닫힘 응답 없음] {gate_id} - 재시도...")
-                    # 약간의 지연 후 재시도
-                    time.sleep(1.0)
-                    self.interface.send_command(gate_id, "CLOSE")
-                    response = self.interface.read_response(timeout=timeout)
-                    success = self._is_success_response(response, gate_id, "CLOSE")
-                    
-                    if success:
-                        print(f"[게이트 닫힘 완료 (재시도)] {gate_id}")
-                        # facility_status_manager 업데이트 메서드 호출
-                        self._update_gate_status(gate_id, "CLOSED", "IDLE")
-                    else:
-                        # 대체 확인 시도
-                        if response and ("CLOSED" in response or "_CLOSED" in response):
-                            print(f"[게이트 닫힘 대체 확인 (재시도)] {gate_id} - 응답: {response}")
-                            self._update_gate_status(gate_id, "CLOSED", "IDLE")
-                            success = True
-                        else:
-                            print(f"[게이트 닫힘 실패 (재시도)] {gate_id} - 응답: {response}")
-                            
-                            # 실패시 세 번째 시도
-                            if not response:
-                                print(f"[게이트 닫힘 응답 없음] {gate_id} - 마지막 시도...")
-                                time.sleep(2.0)  # 더 긴 지연
-                                self.interface.send_command(gate_id, "CLOSE")
-                                response = self.interface.read_response(timeout=timeout)
-                                success = self._is_success_response(response, gate_id, "CLOSE")
-                                
-                                if success:
-                                    print(f"[게이트 닫힘 완료 (최종 시도)] {gate_id}")
-                                    # facility_status_manager 업데이트 메서드 호출
-                                    self._update_gate_status(gate_id, "CLOSED", "IDLE")
-                                else:
-                                    # 최종 대체 확인 시도
-                                    if response and ("CLOSED" in response or "_CLOSED" in response):
-                                        print(f"[게이트 닫힘 대체 확인 (최종 시도)] {gate_id} - 응답: {response}")
-                                        self._update_gate_status(gate_id, "CLOSED", "IDLE")
-                                        success = True
-                                    else:
-                                        print(f"[게이트 닫힘 실패 (최종 시도)] {gate_id} - 응답: {response}")
-                                        
-                                        # 강제 닫기 수행
-                                        print(f"[강제 상태 변경] {gate_id} - 응답 실패로 강제로 CLOSED 상태로 설정")
-                                        self._update_gate_status(gate_id, "CLOSED", "FORCED_CLOSE")
-                                        success = True
-                                        
-                                        # facility_status_manager 실패 상태 업데이트
-                                        if self.facility_status_manager:
-                                            self.facility_status_manager.update_gate_status(gate_id, "OPENED", "CLOSE_FAILED")
-                else:
-                    print(f"[게이트 닫힘 실패] {gate_id} - 응답: {response}")
-                    
-                    # 강제 닫기 수행
-                    print(f"[강제 상태 변경] {gate_id} - 응답 실패로 강제로 CLOSED 상태로 설정")
-                    self._update_gate_status(gate_id, "CLOSED", "FORCED_CLOSE")
-                    success = True
-                    
-                    # facility_status_manager 실패 상태 업데이트
-                    if self.facility_status_manager:
-                        self.facility_status_manager.update_gate_status(gate_id, "OPENED", "CLOSE_FAILED")
-        
-        # 작업 완료 표시
-        self.operations_in_progress[gate_id] = False
-        
-        # 가상 환경에서의 특별 처리
-        if not success and (gate_id == "GATE_A" or gate_id == "GATE_B"):  # GATE_A와 GATE_B 모두에 대해 특별 처리
-            print(f"[가상 환경 대응] {gate_id}의 상태를 'CLOSED'로 강제 설정합니다.")
-            # facility_status_manager 업데이트 메서드 호출
-            self._update_gate_status(gate_id, "CLOSED", "FORCED_CLOSE")
-            success = True
-            
+            print(f"[{gate_id}] 게이트 닫기 실패.")
+            self._update_gate_status(gate_id, self.gate_states.get(gate_id, "UNKNOWN"), "CLOSE_FAILED")
+
         return success
+
+    def handle_message(self, message: str):
+        """
+        장치로부터 비동기적으로 수신된 메시지를 처리합니다.
+        (예: 센서에 의해 자동으로 상태가 변경되었을 경우)
+        """
+        if not message:
+            return
+
+        parsed = self.interface.parse_response(message)
+        if parsed.get("type") == "GATE":
+            gate_id = parsed.get("gate_id")
+            state = parsed.get("state")
+            if gate_id in self.gate_states:
+                # 현재 상태와 다른 경우에만 업데이트
+                if self.gate_states[gate_id] != state:
+                    print(f"[{gate_id}] 비동기 상태 변경 감지: {state}")
+                    self._update_gate_status(gate_id, state, "STATUS_UPDATE")
+
+    def _update_gate_status(self, gate_id: str, state: str, operation: str):
+        """게이트의 내부 상태를 업데이트하고, 중앙 관리 매니저에 보고합니다."""
+        old_state = self.gate_states.get(gate_id)
+        self.gate_states[gate_id] = state
+        
+        # 상태가 실제로 변경되었을 때만 로그를 남기고 보고합니다.
+        if old_state != state:
+            print(f"[상태 변경] {gate_id}: {old_state} -> {state} (동작: {operation})")
+            if self.facility_status_manager:
+                self.facility_status_manager.update_gate_status(gate_id, state, operation)
+        else:
+            # 상태는 같지만 동작(operation)만 변경된 경우 (예: OPENING -> OPEN_FAILED)
+            if self.facility_status_manager:
+                 self.facility_status_manager.update_gate_status(gate_id, state, operation)

@@ -3,132 +3,120 @@ import time
 from typing import Optional
 
 class SerialController:
+    """
+    시리얼 장치와의 통신을 제어하는 기본 클래스입니다.
+    명령 전송, 비동기 메시지 폴링, 안정적인 통신을 위한 재시도 로직을 포함합니다.
+    """
     def __init__(self, serial_interface):
         self.interface = serial_interface
-        self.running = True
+        self.running = False
         self.polling_thread: Optional[threading.Thread] = None
-    
-    # 시리얼 폴링 시작  
+
     def start_polling(self):
+        """백그라운드에서 시리얼 포트를 주기적으로 확인하는 폴링 스레드를 시작합니다."""
         if self.polling_thread and self.polling_thread.is_alive():
-            print(f"[{self.__class__.__name__}] 이미 폴링 중")
-            return False  # 이미 실행 중
-            
-        self.polling_thread = threading.Thread(
-            target=self.poll_serial,
-            daemon=True
-        )
-        self.running = True
-        self.polling_thread.start()
-        print(f"[{self.__class__.__name__}] 시리얼 폴링 시작")
-        return True
+            print(f"[{self.__class__.__name__}] 이미 폴링 스레드가 실행 중입니다.")
+            return
         
-    # 시리얼 폴링 중지
+        self.running = True
+        self.polling_thread = threading.Thread(target=self._poll_serial_loop, daemon=True)
+        self.polling_thread.start()
+        print(f"[{self.__class__.__name__}] 시리얼 폴링을 시작합니다.")
+
     def stop_polling(self):
-        if not self.polling_thread or not self.polling_thread.is_alive():
-            return False
+        """실행 중인 폴링 스레드를 중지합니다."""
+        if not self.running:
+            return
             
         self.running = False
-        self.polling_thread.join(timeout=1)
-        print(f"[{self.__class__.__name__}] 시리얼 폴링 중지")
-        return True
-        
-    # 시리얼 폴링 루프
-    def poll_serial(self):
+        if self.polling_thread:
+            self.polling_thread.join(timeout=1)
+        print(f"[{self.__class__.__name__}] 시리얼 폴링을 중지했습니다.")
+
+    def _poll_serial_loop(self):
+        """
+        폴링 스레드의 메인 루프.
+        지속적으로 시리얼 응답을 확인하고, 메시지가 있으면 handle_message를 호출합니다.
+        """
         device_name = self.__class__.__name__
-        print(f"[{device_name}] 시리얼 폴링 시작")
-        try:
-            while self.running:
-                try:
-                    line = self.interface.read_response(timeout=1)  # 짧은 타임아웃
-                    if line and isinstance(line, str):
-                        self.handle_message(line)
-                except Exception as e:
-                    print(f"[{device_name} 경고] 폴링 중 오류: {e}")
-                    # 일시적 오류시 중단 방지
-                time.sleep(0.01)  # CPU 사용량 감소
-        except Exception as e:
-            print(f"[{device_name} 오류] 시리얼 폴링 중단: {e}")
-        finally:
-            print(f"[{device_name}] 시리얼 폴링 종료")
-    
-    # 메시지 처리
+        print(f"[{device_name}] 폴링 루프 시작.")
+        while self.running:
+            try:
+                # 장치로부터 비동기적으로 들어오는 메시지를 확인 (타임아웃을 짧게 설정)
+                line = self.interface.read_response(timeout=0.5)
+                if line:
+                    self.handle_message(line)
+            except Exception as e:
+                print(f"[{device_name}] 폴링 중 오류 발생: {e}")
+            time.sleep(0.05)  # CPU 사용량 조절
+        print(f"[{device_name}] 폴링 루프 종료.")
+
     def handle_message(self, message: str):
-        raise NotImplementedError("자식 클래스에서 구현해야 합니다")
-    
-    # 응답 읽기
-    def read_response(self, timeout=5):
-        return self.interface.read_response(timeout=timeout)
-    
-    # 명령 전송
+        """
+        폴링 루프에서 수신된 메시지를 처리하는 메서드입니다.
+        자식 클래스에서 각 장치에 맞게 반드시 재정의해야 합니다.
+        """
+        raise NotImplementedError("자식 클래스에서 이 메서드를 구현해야 합니다.")
+
+    def send_command_and_wait_ack(self, target: str, action: str, retries: int = 3, timeout: float = 2.0) -> bool:
+        """
+        명령을 전송하고, 지정된 시간 동안 ACK(응답)를 기다립니다.
+        응답이 없으면 지정된 횟수만큼 재시도합니다.
+
+        Args:
+            target (str): 명령 대상 (예: "GATE_A")
+            action (str): 수행할 동작 (예: "OPEN")
+            retries (int): 재시도 횟수
+            timeout (float): 각 시도에 대한 응답 대기 시간 (초)
+
+        Returns:
+            bool: ACK 수신 성공 시 True, 아니면 False
+        """
+        command_str = f"{target.upper()}_{action.upper()}"
+        
+        for attempt in range(retries):
+            print(f"[{self.__class__.__name__}] 명령 전송 ({attempt + 1}/{retries}): {command_str}")
+            try:
+                # 1. 명령 전송
+                self.interface.send_command(target, action)
+                
+                # 2. ACK 대기
+                # ACK 형식은 'ACK:명령어' 또는 'ACK:명령어:결과'를 기대합니다.
+                response = self.interface.read_response(timeout=timeout)
+                
+                # 3. ACK 확인
+                if response and "ACK" in response and command_str in response:
+                    print(f"[{self.__class__.__name__}] 명령 성공 (ACK 수신): {response}")
+                    return True
+                elif response:
+                    print(f"[{self.__class__.__name__}] 예상치 못한 응답 수신: {response}")
+                    # 예상치 못한 응답이라도 일단 수신은 되었으므로, 폴링 핸들러에 처리를 위임할 수 있습니다.
+                    self.handle_message(response)
+                else:
+                    print(f"[{self.__class__.__name__}] 응답 시간 초과 ({timeout}초)")
+
+            except Exception as e:
+                print(f"[{self.__class__.__name__}] 명령 전송 중 오류 발생: {e}")
+
+            # 재시도 전 잠시 대기
+            time.sleep(0.5)
+
+        print(f"[{self.__class__.__name__}] 명령 실패: {command_str} (총 {retries}회 시도)")
+        return False
+
     def send_command(self, target: str, action: str):
         """
-        표준화된 형식으로 명령 전송
-        
-        Args:
-            target: 대상 (예: "GATE_A", "BELT")
-            action: 동작 (예: "OPEN", "CLOSE", "RUN", "STOP")
-            
-        Returns:
-            bool: 성공 여부
+        단순히 명령을 전송하고 응답을 기다리지 않습니다. (Fire and Forget)
+        ACK 확인이 필요 없는 경우에 사용합니다.
         """
         try:
             self.interface.send_command(target, action)
-            return True
         except Exception as e:
-            print(f"[{self.__class__.__name__}] 명령 전송 오류: {e}")
-            return False
-    
-    # 직접 쓰기
-    def write(self, message: str):
-        """
-        직접 메시지 쓰기
-        
-        Args:
-            message: 전송할 메시지
-            
-        Returns:
-            bool: 성공 여부
-        """
-        try:
-            self.interface.write(message)
-            return True
-        except Exception as e:
-            print(f"[{self.__class__.__name__}] 메시지 쓰기 오류: {e}")
-            return False
-        
-    # 종료
+            print(f"[{self.__class__.__name__}] 단순 명령 전송 오류: {e}")
+
     def close(self):
-        self.running = False
-        if self.polling_thread and self.polling_thread.is_alive():
-            self.polling_thread.join(timeout=1)
+        """컨트롤러와 시리얼 인터페이스를 안전하게 종료합니다."""
+        self.stop_polling()
         if hasattr(self.interface, 'close'):
             self.interface.close()
         print(f"[{self.__class__.__name__}] 종료됨")
-
-    def read_responses(self, max_count=10):
-        """한 번에 여러 개의 응답을 읽어오는 메서드"""
-        responses = []
-        for _ in range(max_count):
-            response = self.interface.peek_response()
-            if not response:
-                break
-            self.handle_message(response)
-            responses.append(response)
-        return responses
-
-    def start_response_reader(self):
-        """백그라운드에서 응답을 지속적으로 읽는 스레드 시작"""
-        import threading
-        
-        def reader_thread():
-            import time
-            while True:
-                # 인터페이스에 데이터가 있는지 확인하고 모두 처리
-                if hasattr(self.interface.ser, 'in_waiting') and self.interface.ser.in_waiting > 0:
-                    self.read_responses()
-                time.sleep(0.1)  # 0.1초마다 확인
-                
-        self.reader_thread = threading.Thread(target=reader_thread, daemon=True)
-        self.reader_thread.start()
-        print(f"[🔄 응답 리더 시작] 백그라운드 응답 처리 스레드 시작됨") 
