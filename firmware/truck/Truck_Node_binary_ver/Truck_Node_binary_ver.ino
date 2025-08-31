@@ -67,7 +67,7 @@ struct UIDEntry
   const char* description;
 };
 
-UIDEntry registeredCards[] = {
+UIDEntry registeredCards[] = { 
   // { {0x8B, 0xEE, 0xC9, 0x01}, "CHARGE_LOCATION" },
   { {0x86, 0x51, 0x0A, 0x05}, "CHECKPOINT_A" },
   { {0x12, 0x6D, 0x07, 0x05}, "CHECKPOINT_B" },
@@ -254,7 +254,7 @@ void setup()
     delay(500);
     Serial.print(".");
   }
-  Serial.println("\n✅Wi-Fi 연결 완료!");
+  Serial.println("\nWi-Fi 연결 완료!");
 
   // 서버 접속 시도
   reconnectToServer();
@@ -262,16 +262,16 @@ void setup()
   // RFID 초기화
   SPI.begin(18, 19, 23, 21);  // SCK, MISO, MOSI, SS
   rfid.PCD_Init();
-  Serial.println("✅RC522 RFID 리더기 시작됨!");
+  Serial.println("RC522 RFID 리더기 시작됨!");
 
 
   // 미션 요청 자동 전송
   delay(2000);  // 안정화 대기
   send_assign_mission();
-  // ✅ 시작 위치를 STANDBY로 설정
+  // 시작 위치를 STANDBY로 설정
   current_position = "STANDBY";
   current_position_id = STANDBY;
-  Serial.println("🟢 초기 위치 상태: STANDBY");
+  Serial.println("초기 위치 상태: STANDBY");
   system_start_time = millis();  // 시스템 부팅 기준 시각 저장
 
 }
@@ -280,7 +280,7 @@ void loop()
 {
   reconnectToServer();
 
-  // ✅ 서버로부터 수신 메시지 처리
+  // 서버로부터 수신 메시지 처리
   if (client && client.available() >= 4) 
   {
     static uint8_t buffer[64];
@@ -291,33 +291,33 @@ void loop()
     }
   }
 
-  // ✅ 현재 시간 갱신
+  // 현재 시간 갱신
   unsigned long current_time = millis();
 
 
 
-  // ✅ 주기적인 미션 체크
+  // 주기적인 미션 체크
   if (current_time - last_mission_check >= 2000) 
   {
     last_mission_check = current_time;
     if (!mission_requested && (mission_target == 0x00 || mission_target == 0xFF) && (current_position_id == 0x00 || current_position_id == STANDBY) )  
     {
-      Serial.println("[🔄 미션 체크] 새로운 미션 확인 중...");
+      Serial.println("[미션 체크] 새로운 미션 확인 중...");
       send_assign_mission();
-      mission_requested = false;  // ✅ 중복 요청 방지
+      mission_requested = false;  // 중복 요청 방지
     }
   }
 
-  // ✅ 최초 1회 지연 처리 (1초)
+  // 최초 1회 지연 처리 (1초)
   if (!initial_delay_done && (current_time - system_start_time < 1500)) 
   {
-    Serial.printf("⏳ 시스템 부팅 후 대기 중... %.0fms 남음\n", 
+    Serial.printf("[시스템 부팅 후 대기 중...] %.0fms 남음\n", 
                   1000.0 - (current_time - system_start_time));
     return;  // 아직 1초 안 지났으므로 아무 작업도 하지 않음
   }
   initial_delay_done = true;  // 이후부터는 바로 동작
 
-  // ✅ 주행 제어
+  // 주행 제어
   obstacle_block = obstacle_detected();
   if (run_command && !obstacle_block && !battery_empty)
   {
@@ -327,45 +327,45 @@ void loop()
   }
   else if (obstacle_block) 
   {
-    Serial.println("🛑 장애물 감지로 정지");
+    Serial.println("[장애물 감지로 정지]");
     stop_motors();
     send_obstacle(current_position_id, true, (uint16_t)last_distance_cm);
     //integral = 0;
   }
   
 
-  // ✅ 적재 시작 지연 처리
+  // 적재 시작 지연 처리
   if (wait_start_loading && (current_time - wait_start_loading_time >= 2000)) 
   {
-    Serial.println("🕒 적재 시작 메시지 전송 (2초 지연 후)");
+    Serial.println("[적재 시작 메시지 전송] (2초 지연 후)");
     send_start_loading(current_position_id);
     loading_in_progress = true;
     loading_start_time = current_time;
     wait_start_loading = false;
   }
 
-  // ✅ 적재 완료 로직 (5초 후 자동 전송)
+  // 적재 완료 로직 (5초 후 자동 전송)
   if (loading_in_progress && (current_time - loading_start_time >= 5000)) 
   {
-    Serial.println("✅ 적재 완료 메시지 전송 (5초 경과)");
+    Serial.println("[적재 완료 메시지 전송] (5초 경과)");
     send_finish_loading(current_position_id);
     if (mission_target == current_position_id) 
     {
-      Serial.println("✅ [미션 완료] mission_target 초기화");
+      Serial.println("[미션 완료] mission_target 초기화");
       mission_target = 0;
     }
     loading_in_progress = false;
     run_command = true;
   }
 
-  // ✅ 언로딩 시작 지연 처리 (BELT 도착 후 2초 후)
+  // 언로딩 시작 지연 처리 (BELT 도착 후 2초 후)
   if (wait_start_unloading) {
-    Serial.printf("[⏳ 대기 중] 언로딩 시작까지 %.1f초 남음\n", 
+    Serial.printf("[대기 중] 언로딩 시작까지 %.1f초 남음\n", 
                   (2000 - (current_time - wait_start_unloading_time)) / 1000.0);
     
     if (current_time - wait_start_unloading_time >= 2000) {
-      Serial.println("🕒 [START] 언로딩 시작 메시지 전송 (2초 지연 후)");
-      Serial.printf("👉 current_position_id = 0x%02X (%s)\n", 
+      Serial.println("[START] 언로딩 시작 메시지 전송 (2초 지연 후)");
+      Serial.printf("current_position_id = 0x%02X (%s)\n", 
                     current_position_id, current_position.c_str());
 
       send_start_unloading(current_position_id);
@@ -375,14 +375,14 @@ void loop()
     }
   }
 
-  // ✅ 언로딩 완료 로직 (시작 후 5초 뒤)
+  // 언로딩 완료 로직 (시작 후 5초 뒤)
   if (unloading_in_progress) {
-    Serial.printf("[📦 언로딩 중] 완료까지 %.1f초 남음\n", 
+    Serial.printf("[언로딩 중] 완료까지 %.1f초 남음\n", 
                   (5000 - (current_time - unloading_start_time)) / 1000.0);
     
     if (current_time - unloading_start_time >= 5000) {
-      Serial.println("✅ [FINISH] 언로딩 완료 메시지 전송 (5초 경과)");
-      Serial.printf("👉 current_position_id = 0x%02X (%s)\n", 
+      Serial.println("[FINISH] 언로딩 완료 메시지 전송 (5초 경과)");
+      Serial.printf("current_position_id = 0x%02X (%s)\n", 
                     current_position_id, current_position.c_str());
 
       send_finish_unloading(current_position_id);
@@ -390,7 +390,7 @@ void loop()
     }
   }
     
-  // // ✅RFID 체크
+  // //RFID 체크
   // if (!rfid.PICC_IsNewCardPresent() || !rfid.PICC_ReadCardSerial()) 
   // {
   //   return;
@@ -398,7 +398,7 @@ void loop()
 
   // // UID 확인 및 서버 전송
   // checkAndPrintUID(rfid.uid.uidByte);
-    // ✅RFID 체크 (쿨타임 1초 적용)
+    // RFID 체크 (쿨타임 1초 적용)
   if (current_time - last_rfid_check >= 1000)  // 1초 쿨타임
   {
     if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial()) 
@@ -414,7 +414,7 @@ void loop()
 
 
 
-  // ✅ 배터리 감소 처리 (STANDBY에서는 감소 안 함)
+  // 배터리 감소 처리 (STANDBY에서는 감소 안 함)
   if (current_time - last_battery_drop >= BATTERY_DROP_INTERVAL) 
   {
     last_battery_drop = current_time;
@@ -429,16 +429,16 @@ void loop()
         battery_empty = true;
         run_command = false;
         stop_motors();
-        Serial.println("❌ 배터리 소진 → 트럭 정지");
+        Serial.println("[배터리 소진] 트럭 정지");
       }
 
-      Serial.print("🪫 배터리 감소됨: ");
+      Serial.print("[배터리 감소됨]: ");
       Serial.print(battery_level);
       Serial.println("%");
     }
   }
 
-  // ✅ 상태 전송 (STATUS_UPDATE)
+  // 상태 전송 (STATUS_UPDATE)
   if (current_time - last_battery_report >= STATUS_REPORT_INTERVAL) 
   {
     last_battery_report = current_time;
@@ -462,11 +462,11 @@ void receive_binary(const uint8_t* buffer, uint8_t len) {
   const uint8_t* payload = &buffer[4];
 
   if (receiver_id != get_sender_id_from_truck_id(truck_id)) {
-    Serial.println("[❌ 수신 무시] 나에게 온 메시지가 아님");
+    Serial.println("[수신 무시] 나에게 온 메시지가 아님");
     return;
   }
 
-  //Serial.printf("[📩 수신] cmd: %02X, payload_len: %d\n", cmd_id, payload_len);
+  //Serial.printf("[수신] cmd: %02X, payload_len: %d\n", cmd_id, payload_len);
 
   switch (cmd_id) {
     case MISSION_ASSIGNED:
@@ -475,7 +475,7 @@ void receive_binary(const uint8_t* buffer, uint8_t len) {
 
         if (battery_level <= 30) 
         {
-          Serial.printf("⚡ [배터리 부족: %d%%] 미션 거절하고 충전 시작\n", battery_level);
+          Serial.printf("[배터리 부족: %d%%] 미션 거절하고 충전 시작\n", battery_level);
           mission_target = 0;
           run_command = false;
         } else 
@@ -483,7 +483,7 @@ void receive_binary(const uint8_t* buffer, uint8_t len) {
           mission_target = new_mission;
           run_command = true;
           mission_requested = true;
-          Serial.printf("📝 [미션 수락] 목표 위치 ID: 0x%02X\n", mission_target);
+          Serial.printf("[미션 수락] 목표 위치 ID: 0x%02X\n", mission_target);
         }
       }
       break;
@@ -493,24 +493,24 @@ void receive_binary(const uint8_t* buffer, uint8_t len) {
     case NO_MISSION:
       mission_target = 0;
       run_command = false;
-      Serial.println("📭 [미션 없음] 대기 상태 유지");
+      Serial.println("[미션 없음] 대기 상태 유지");
       break;
 
     case RUN:
       run_command = true;
-      Serial.println("🏃‍♂️ [명령] 주행 시작");
+      Serial.println("[명령] 주행 시작");
       break;
 
     case STOP:
       run_command = false;
       stop_motors();
-      Serial.println("🛑 [명령] 주행 정지");
+      Serial.println("[명령] 주행 정지");
       break;
 
     case GATE_OPENED:
       if (payload_len >= 1) {
         uint8_t gate_id = payload[0];
-        //Serial.printf("🚪 [게이트 열림 감지] gate_id: %02X\n", gate_id);
+        //Serial.printf("[게이트 열림 감지] gate_id: %02X\n", gate_id);
         run_command = true;
       }
       break;
@@ -519,11 +519,11 @@ void receive_binary(const uint8_t* buffer, uint8_t len) {
       battery_level = 100;
       battery_empty = false;
 
-      Serial.println("🔋 [충전 완료] 배터리 100% 복구");
+      Serial.println("[충전 완료] 배터리 100% 복구");
       send_finish_charging(battery_level);
 
       delay(500); // 약간의 간격 후 미션 요청
-      Serial.println("📨 [충전 완료 후] 미션 재요청");
+      Serial.println("[충전 완료 후] 미션 재요청");
       //send_assign_mission();
 
       mission_target = 0;
@@ -531,7 +531,7 @@ void receive_binary(const uint8_t* buffer, uint8_t len) {
       break;
 
     default:
-      Serial.printf("⚠️ [알 수 없는 명령] cmd_id: %02X\n", cmd_id);
+      Serial.printf("[알 수 없는 명령] cmd_id: %02X\n", cmd_id);
       break;
   }
 }
@@ -557,7 +557,7 @@ void send_binary(uint8_t cmd_id, const uint8_t* payload, uint8_t payload_len)
   if (client && client.connected()) 
   {
     client.write(buffer, 4 + payload_len);
-    Serial.printf("[📤 Binary] CMD %02X → SERVER: ", cmd_id);
+    Serial.printf("[Binary] CMD %02X → SERVER: ", cmd_id);
     for (int i = 0; i < 4 + payload_len; i++) Serial.printf("%02X ", buffer[i]);
     Serial.println();
   }
@@ -717,7 +717,7 @@ bool obstacle_detected() {
 /*--------------------------------언로딩 처리 함수--------------------------------*/
 
 void start_unloading() {
-  Serial.println("🕒 언로딩 시작 메시지 전송 (2초 지연 후)");
+  Serial.println("[언로딩 시작 메시지 전송] (2초 지연 후)");
   send_start_unloading(current_position_id);
   unloading_in_progress = true;
   unloading_stage = 1;
@@ -729,19 +729,19 @@ void handle_unloading(unsigned long current_time) {
   if (!unloading_in_progress) return;
 
   if (unloading_stage == 1 && current_time - unloading_stage_time >= 0) {
-    Serial.println("✅ 언로딩 서보모터 → 90도 (내리기)");
+    Serial.println("[언로딩 서보모터] 90도 (내리기)");
     unloading_servo.write(SERVO_DROP_ANGLE);
     unloading_stage_time = current_time;
     unloading_stage = 2;
   }
   else if (unloading_stage == 2 && current_time - unloading_stage_time >= 2000) {
-    Serial.println("✅ 언로딩 서보모터 → 170도 (올리기)");
+    Serial.println("[언로딩 서보모터] 170도 (올리기)");
     unloading_servo.write(SERVO_INIT_ANGLE);
     unloading_stage_time = current_time;
     unloading_stage = 3;
   }
   else if (unloading_stage == 3 && current_time - unloading_stage_time >= 1000) {
-    Serial.println("✅ 언로딩 완료 메시지 전송");
+    Serial.println("[언로딩 완료 메시지 전송]");
     send_finish_unloading(current_position_id);
     unloading_in_progress = false;
     unloading_stage = 0;
@@ -764,8 +764,8 @@ bool checkAndPrintUID(byte* uid) {
   for (int i = 0; i < numRegistered; i++) {
     if (isSameUID(uid, registeredCards[i].uid)) {
       const char* desc = registeredCards[i].description;
-      Serial.println("✅ 등록된 카드입니다!");
-      Serial.print("📌 ");
+      Serial.println("[등록된 카드입니다!]");
+      Serial.print("[");
       Serial.println(desc);
 
       // 문자열로 유지 (디버깅용)
@@ -814,9 +814,9 @@ bool checkAndPrintUID(byte* uid) {
         send_arrived(STANDBY, 0x00);
         run_command = false;
         stop_motors();
-        // ✅ 미션 없으면 → 미션 요청
+        // 미션 없으면 → 미션 요청
         if (mission_target == 0 || mission_target == 0xFF) {
-          Serial.println("📨 [STANDBY] 미션 없음 → 요청");
+          Serial.println("[[STANDBY] 미션 없음] 요청");
           send_assign_mission();
         }
       }
@@ -824,7 +824,7 @@ bool checkAndPrintUID(byte* uid) {
       // 도착 위치가 목표 위치인 경우 정지
       if (mission_target == pos_id) 
       {
-        Serial.println("🎯 [도착 확인] 목적지 도달 → 주행 정지");
+        Serial.println("[[도착 확인] 목적지 도달] 주행 정지");
         run_command = false;
         stop_motors();
       }
@@ -833,7 +833,7 @@ bool checkAndPrintUID(byte* uid) {
     }
   }
 
-  Serial.println("❌ 등록되지 않은 카드입니다!");
+  Serial.println("[등록되지 않은 카드입니다!]");
   return false;
 }
 
@@ -843,14 +843,14 @@ void reconnectToServer()
 {
   if (!client.connected()) 
   {
-    Serial.print("🌐 서버 접속 시도 중...");
+    Serial.print("[서버 접속 시도 중...]");
     if (client.connect(serverIP, serverPort)) 
     {
-      Serial.println("✅ 접속 성공!");
+      Serial.println("[접속 성공!]");
     } 
     else 
     {
-      Serial.println("❌ 접속 실패");
+      Serial.println("[접속 실패]");
     }
   }
 }

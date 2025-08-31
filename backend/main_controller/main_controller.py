@@ -68,13 +68,13 @@ class MainController:
         elif "GATE_B" in self.gate_controllers:
             self.gate_controller = self.gate_controllers["GATE_B"]
         else:
-            print("[⚠️ 경고] 사용 가능한 게이트 컨트롤러가 없습니다")
+            print("[경고] 사용 가능한 게이트 컨트롤러가 없습니다")
             self.gate_controller = None
             
         # 디스펜서 컨트롤러 가져오기
         self.dispenser_controller = self.device_manager.get_controller("DISPENSER")
         if not self.dispenser_controller:
-            print("[⚠️ 경고] 디스펜서 컨트롤러를 찾을 수 없습니다")
+            print("[경고] 디스펜서 컨트롤러를 찾을 수 없습니다")
         
         # FSM 관리자 - 새 버전 사용
         self.truck_fsm_manager = TruckFSMManager(
@@ -92,7 +92,7 @@ class MainController:
         # 초기 TruckCommandSender 설정
         self.set_truck_commander({})
 
-        print("[✅ MainController 초기화 완료]")
+        print("[MainController 초기화 완료]")
 
     # 트럭 명령 전송자 설정
     def set_truck_commander(self, truck_socket_map: dict):
@@ -116,7 +116,7 @@ class MainController:
         # TCP 서버 참조 설정
         if hasattr(self, 'tcp_server'):
             commander.set_tcp_server(self.tcp_server)
-            print("[✅ TCP 서버 참조 설정] commander에 tcp_server 참조가 설정되었습니다.")
+            print("[TCP 서버 참조 설정] commander에 tcp_server 참조가 설정되었습니다.")
         
         self.truck_fsm_manager.set_commander(commander)
         
@@ -128,7 +128,7 @@ class MainController:
             if hasattr(self, 'truck_status_manager'):
                 commander.set_truck_status_manager(self.truck_status_manager)
             
-            print("[✅ 명령 전송자 설정] facility_status_manager에 명령 전송자 설정 완료")
+            print("[명령 전송자 설정] facility_status_manager에 명령 전송자 설정 완료")
             self.command_sender_initialized = True
 
     # 메시지 처리
@@ -138,7 +138,7 @@ class MainController:
         cmd = msg.get("cmd", "").strip().upper()
         payload = msg.get("payload", {})
 
-        print(f"[📨 MainController] sender={sender}, cmd={cmd}")
+        print(f"[MainController] sender={sender}, cmd={cmd}")
 
         # 벨트 수동 제어
         if cmd.startswith("BELT_"):
@@ -159,16 +159,16 @@ class MainController:
         if sender:
             self.truck_controller.handle_message(msg)
         else:
-            print("[⚠️ 경고] sender가 없는 메시지")
+            print("[경고] sender가 없는 메시지")
 
     # 수동 벨트 제어 명령 처리
     def _handle_manual_belt_command(self, cmd: str):
         """수동 벨트 제어"""
-        print(f"[⚙️ 수동 벨트 제어] CMD: {cmd}")
+        print(f"[수동 벨트 제어] CMD: {cmd}")
         if self.belt_controller:
             self.belt_controller.handle_message(cmd)
         else:
-            print("[❌ 오류] 벨트 컨트롤러를 찾을 수 없습니다")
+            print("[오류] 벨트 컨트롤러를 찾을 수 없습니다")
 
     # 수동 게이트 제어 명령 처리
     def _handle_manual_gate_command(self, cmd: str):
@@ -185,14 +185,14 @@ class MainController:
                 elif action == "CLOSE":
                     gate_controller.close_gate(gate_id)
             else:
-                print(f"[❌ 오류] {gate_id} 컨트롤러를 찾을 수 없습니다")
+                print(f"[오류] {gate_id} 컨트롤러를 찾을 수 없습니다")
         else:
-            print(f"[❌ 게이트 명령 포맷 오류] {cmd}")
+            print(f"[게이트 명령 포맷 오류] {cmd}")
             
     # 수동 디스펜서 제어 명령 처리
     def _handle_manual_dispenser_command(self, cmd: str):
         """수동 디스펜서 제어"""
-        print(f"[⚙️ 수동 디스펜서 제어] CMD: {cmd}")
+        print(f"[수동 디스펜서 제어] CMD: {cmd}")
         parts = cmd.split("_")
         
         if len(parts) >= 2:
@@ -203,28 +203,28 @@ class MainController:
                 success = self.dispenser_controller.send_command(dispenser_id, action)
                 print(f"[디스펜서 명령 결과] {action}: {'성공' if success else '실패'}")
             else:
-                print("[❌ 오류] 디스펜서 컨트롤러를 찾을 수 없습니다")
+                print("[오류] 디스펜서 컨트롤러를 찾을 수 없습니다")
         else:
-            print(f"[❌ 디스펜서 명령 포맷 오류] {cmd}")
+            print(f"[디스펜서 명령 포맷 오류] {cmd}")
 
     # 시스템 종료
     def shutdown(self):
         """시스템 종료"""
-        print("[🔌 시스템 종료 중...]")
+        print("[시스템 종료 중...]")
         self.mission_db.close()
         self.status_db.close()
         self.device_manager.close_all()
         if self.facility_status_manager:
             self.facility_status_manager.close()
-        print("[✅ 시스템 종료 완료]")
+        print("[시스템 종료 완료]")
 
     # TCP 서버 참조 설정
     def set_tcp_server(self, tcp_server):
         """TCP 서버 참조 설정"""
         self.tcp_server = tcp_server
-        print("[✅ TCP 서버 참조 설정] MainController에 tcp_server 참조가 설정되었습니다.")
+        print("[TCP 서버 참조 설정] MainController에 tcp_server 참조가 설정되었습니다.")
         
         # 기존 명령 전송자가 있으면 TCP 서버 참조도 설정
         if hasattr(self.truck_fsm_manager, 'command_sender') and self.truck_fsm_manager.command_sender:
             self.truck_fsm_manager.command_sender.set_tcp_server(tcp_server)
-            print("[✅ TCP 서버 참조 설정] 기존 command_sender에 tcp_server 참조가 설정되었습니다.") 
+            print("[TCP 서버 참조 설정] 기존 command_sender에 tcp_server 참조가 설정되었습니다.")

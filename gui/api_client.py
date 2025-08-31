@@ -42,14 +42,14 @@ class APIClient:
     def get(self, endpoint: str, params: Optional[Dict] = None) -> Dict:
         """GET 요청 수행
         
-        Args:
+        매개변수:
             endpoint: API 엔드포인트 경로 (/api/ 이후 부분)
             params: URL 파라미터 (옵션)
             
-        Returns:
+        반환:
             응답 데이터 (JSON)
             
-        Raises:
+        예외:
             ConnectionError: 연결 실패
             TimeoutError: 요청 시간 초과
             ValueError: 잘못된 응답
@@ -76,14 +76,14 @@ class APIClient:
     def post(self, endpoint: str, data: Dict) -> Dict:
         """POST 요청 수행
         
-        Args:
+        매개변수:
             endpoint: API 엔드포인트 경로 (/api/ 이후 부분)
             data: 요청 바디 데이터
             
-        Returns:
+        반환:
             응답 데이터 (JSON)
             
-        Raises:
+        예외:
             ConnectionError: 연결 실패
             TimeoutError: 요청 시간 초과
             ValueError: 잘못된 응답
@@ -259,7 +259,7 @@ class APIClient:
     def control_gate(self, gate_id: str, command: str) -> Dict:
         """게이트 제어
         
-        Args:
+        매개변수:
             gate_id: 게이트 ID (예: "GATE_A")
             command: 제어 명령 ("open" 또는 "close")
         """
@@ -269,7 +269,7 @@ class APIClient:
     def control_belt(self, belt_id: str, command: str, speed: int = None) -> Dict:
         """벨트 제어
         
-        Args:
+        매개변수:
             belt_id: 벨트 ID (예: "BELT")
             command: 제어 명령 ("start", "stop", "emergency_stop")
             speed: 벨트 속도 (0-100)
@@ -283,7 +283,7 @@ class APIClient:
     def restart_tcp_server(self) -> Dict:
         """TCP 서버 재시작
         
-        Returns:
+        반환:
             응답 데이터 (JSON)
         """
         return self.post("system/tcp/restart", {})
@@ -291,10 +291,10 @@ class APIClient:
     def get_tcp_server_status(self) -> Dict:
         """TCP 서버 상태 조회
         
-        Returns:
+        반환:
             TCP 서버 상태 정보 (JSON)
         """
         return self.get("system/tcp/status")
 
 # 싱글톤 인스턴스 사용을 위한 전역 변수
-api_client = APIClient() 
+api_client = APIClient()

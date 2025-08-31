@@ -1,15 +1,15 @@
 #include <Servo.h>
 
-const int MOTOR_PIN_A = 5;  // PWM
-const int MOTOR_PIN_B = 6;  // PWM
-const int SERVO_PIN = 9;    // 서보는 Servo.write() 사용
+const int MOTOR_PIN_A = 5;  // PWM 제어
+const int MOTOR_PIN_B = 6;  // PWM 제어
+const int SERVO_PIN = 9;    // 서보모터 핀, Servo.write() 함수 사용
 const int SENSOR_PIN_A = A0;
 const int SENSOR_PIN_B = A1;
 const int CDS_THRESHOLD = 600;  // 조도센서 기준값
 
 const int MOTOR_SPEED = 100; // PWM 속도
 
-// enum 대체: ROUTE_A = 0, ROUTE_B = 1, ROUTE_NONE = 2
+// 경로 Enum 대체: ROUTE_A = 0, ROUTE_B = 1, ROUTE_NONE = 2
 #define ROUTE_A 0
 #define ROUTE_B 1
 #define ROUTE_NONE 2
@@ -30,7 +30,7 @@ void setup() {
   Serial.begin(9600);
   conveyorServo.attach(SERVO_PIN);
   conveyorServo.write(50);
-  Serial.println("STATUS:BELT:ROUTE_A"); // default A route
+  Serial.println("STATUS:BELT:ROUTE_A"); // 기본 경로 A
 }
 
 void loop() {
